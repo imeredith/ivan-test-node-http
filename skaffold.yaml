@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/dev1/ivan-test-node-http:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/dev1/ivan-test-node-http:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: ivan-test-node-http
+        chartPath: charts/ivan-test-node-http
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/dev1/ivan-test-node-http'
+          image.tag: '{{.DIGEST_HEX}}'
